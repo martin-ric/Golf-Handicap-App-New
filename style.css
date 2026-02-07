@@ -176,6 +176,167 @@ h1 {
   }
 }
 
+/* Handicap-Bereich (oberhalb der Liste) */
+.handicap-section {
+  margin-top: 2.25rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid rgba(10, 31, 22, 0.08);
+  text-align: center;
+}
+
+.handicap-title {
+  margin: 0 0 0.35rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(10, 31, 22, 0.6);
+  text-transform: uppercase;
+}
+
+.handicap-wert {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0a1f16;
+}
+
+.handicap-hinweis {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.8125rem;
+  color: rgba(10, 31, 22, 0.5);
+}
+
+/* Meine letzten Runden */
+.runden-section {
+  margin-top: 2rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid rgba(10, 31, 22, 0.08);
+}
+
+.runden-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.runden-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0a1f16;
+}
+
+.btn-text {
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(10, 31, 22, 0.55);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.btn-text:hover {
+  color: #0a1f16;
+  background: rgba(10, 31, 22, 0.06);
+}
+
+.btn-loeschen-alle:hover {
+  color: #b91c1c;
+  background: rgba(185, 28, 28, 0.06);
+}
+
+.runden-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.runden-liste:not(:empty) + .runden-leer {
+  display: none;
+}
+
+.runden-karte {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  background: #f8f9fa;
+  border: 1px solid rgba(10, 31, 22, 0.06);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  animation: karteEinblenden 0.3s ease-out;
+}
+
+@keyframes karteEinblenden {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.runden-karte-datum {
+  font-weight: 600;
+  color: #0a1f16;
+}
+
+.runden-karte-details {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.8125rem;
+  color: rgba(10, 31, 22, 0.65);
+}
+
+.runden-karte-differential {
+  font-weight: 600;
+  color: #0a1f16;
+}
+
+.btn-runde-loeschen {
+  grid-row: 1;
+  grid-column: 3;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 1.125rem;
+  line-height: 1;
+  color: rgba(10, 31, 22, 0.4);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-runde-loeschen:hover {
+  color: #b91c1c;
+  background: rgba(185, 28, 28, 0.08);
+}
+
+.runden-leer {
+  margin: 0;
+  padding: 1.25rem 1rem;
+  font-size: 0.875rem;
+  color: rgba(10, 31, 22, 0.5);
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px dashed rgba(10, 31, 22, 0.12);
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   body {
