@@ -1,9 +1,8 @@
 /* ============================================
    Golf Handicap – Score Differential
-   Modernes, sportliches Design
+   Clean, minimalistisch
    ============================================ */
 
-/* Basis: Box-Sizing und Reset */
 *,
 *::before,
 *::after {
@@ -16,28 +15,30 @@ html {
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background-color: #1b4332;
-  color: #fff;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background-color: #f8f9fa;
+  color: #0a1f16;
   min-height: 100vh;
   min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(0.5rem, 4vw, 1rem);
+  padding: clamp(0.5rem, 4vw, 1.5rem);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hauptcontainer – passt sich der Fensterbreite an */
+/* Card – Off-White, dezente Schatten */
 .container {
   width: 100%;
   min-width: 0;
   max-width: 420px;
-  padding: clamp(1rem, 5vw, 2rem);
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: clamp(1.5rem, 6vw, 2.5rem);
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid rgba(10, 31, 22, 0.08);
+  box-shadow: 0 2px 16px rgba(10, 31, 22, 0.06);
 }
 
 /* Überschrift */
@@ -46,13 +47,15 @@ h1 {
   font-size: 1.75rem;
   font-weight: 700;
   text-align: center;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.02em;
+  color: #0a1f16;
 }
 
 .subtitle {
   margin: 0 0 1.75rem 0;
-  font-size: 0.95rem;
-  opacity: 0.85;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: rgba(10, 31, 22, 0.55);
   text-align: center;
 }
 
@@ -60,37 +63,43 @@ h1 {
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .form label {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 500;
-  margin-bottom: -0.25rem;
+  color: rgba(10, 31, 22, 0.85);
+  margin-bottom: -0.2rem;
 }
 
+/* Eingabefelder – dezente Umrandung, Fokus in Forest Green */
 .form input {
   width: 100%;
   padding: 0.85rem 1rem;
   font-size: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  transition: border-color 0.2s, background 0.2s;
+  font-family: inherit;
+  color: #0a1f16;
+  background: #f8f9fa;
+  border: 1px solid rgba(10, 31, 22, 0.12);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(10, 31, 22, 0.35);
+}
+
+.form input:hover {
+  border-color: rgba(10, 31, 22, 0.2);
 }
 
 .form input:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.15);
+  border-color: #0a1f16;
+  box-shadow: 0 0 0 2px rgba(10, 31, 22, 0.08);
 }
 
-/* Dezimalzahlen: Pfeile ausblenden, aber Zahlfeld behalten */
 .form input[type="number"] {
   -moz-appearance: textfield;
 }
@@ -101,53 +110,73 @@ h1 {
   margin: 0;
 }
 
-/* Button – auffällig und klickbar */
+/* Button – Forest Green, geringer Radius */
 .form button {
   margin-top: 0.5rem;
   padding: 1rem 1.5rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: #1b4332;
-  background: #fff;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  color: #f8f9fa;
+  background: #0a1f16;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .form button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  opacity: 0.9;
 }
 
 .form button:active {
-  transform: translateY(0);
+  transform: scale(0.98);
+  transition-duration: 0.1s;
 }
 
-/* Ergebnisbereich direkt unter dem Button */
+/* Ergebnisbereich */
 .ergebnis {
-  margin-top: 1.5rem;
-  min-height: 2.5rem;
-  padding: 1rem;
-  border-radius: 10px;
-  font-size: 1rem;
-  text-align: center;
+  margin-top: 1.75rem;
+  min-height: 3rem;
+  padding: 1.25rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
   font-weight: 500;
+  text-align: center;
+  color: rgba(10, 31, 22, 0.7);
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
 .ergebnis.sichtbar {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  opacity: 1;
+  animation: ergebnisEinblenden 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  background: #f8f9fa;
+  border: 1px solid rgba(10, 31, 22, 0.06);
 }
 
 .ergebnis .wert {
-  font-size: 1.5rem;
-  font-weight: 700;
   display: block;
-  margin-top: 0.25rem;
+  margin-top: 0.35rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0a1f16;
 }
 
-/* Responsive: schmale Fenster und Smartphones */
+@keyframes ergebnisEinblenden {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
 @media (max-width: 480px) {
   body {
     align-items: flex-start;
@@ -155,34 +184,35 @@ h1 {
   }
 
   .container {
-    border-radius: 12px;
+    border-radius: 8px;
+    padding: 1.5rem;
   }
 
   h1 {
-    font-size: clamp(1.25rem, 5vw, 1.5rem);
+    font-size: clamp(1.35rem, 5vw, 1.6rem);
   }
 
   .subtitle {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     margin-bottom: 1.5rem;
   }
 
   .form input,
   .form button {
-    padding: 0.9rem 1rem;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+  }
+
+  .ergebnis {
+    border-radius: 8px;
   }
 
   .ergebnis .wert {
-    font-size: 1.35rem;
+    font-size: 1.5rem;
   }
 }
 
-/* Sehr schmale Viewports: keine Mindestbreite, alles bleibt lesbar */
 @media (max-width: 360px) {
-  .container {
-    border-radius: 10px;
-  }
-
   h1 {
     font-size: 1.25rem;
   }

@@ -33,14 +33,18 @@
    */
   function zeigeErgebnis(differential) {
     ergebnisDiv.textContent = "";
-    ergebnisDiv.classList.add("sichtbar");
-    var label = document.createElement("span");
-    label.textContent = "Score Differential: ";
-    var wert = document.createElement("span");
-    wert.className = "wert";
-    wert.textContent = differential;
-    ergebnisDiv.appendChild(label);
-    ergebnisDiv.appendChild(wert);
+    ergebnisDiv.classList.remove("sichtbar");
+    // Kurz warten, damit Einblend-Animation bei erneutem Berechnen wieder läuft
+    requestAnimationFrame(function () {
+      ergebnisDiv.classList.add("sichtbar");
+      var label = document.createElement("span");
+      label.textContent = "Score Differential";
+      var wert = document.createElement("span");
+      wert.className = "wert";
+      wert.textContent = differential;
+      ergebnisDiv.appendChild(label);
+      ergebnisDiv.appendChild(wert);
+    });
   }
 
   /**
@@ -49,7 +53,10 @@
    */
   function zeigeFehler(nachricht) {
     ergebnisDiv.textContent = nachricht;
-    ergebnisDiv.classList.add("sichtbar");
+    ergebnisDiv.classList.remove("sichtbar");
+    requestAnimationFrame(function () {
+      ergebnisDiv.classList.add("sichtbar");
+    });
   }
 
   /**
