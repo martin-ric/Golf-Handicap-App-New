@@ -15,38 +15,36 @@
     <p class="subtitle">Golf-Handicap berechnen</p>
 
     <form id="handicap-form" class="form" novalidate>
-      <label for="runden-datum">Datum</label>
-      <input type="date" id="runden-datum" name="runden-datum" required aria-describedby="ergebnis">
+      <label for="round-date">Datum</label>
+      <input type="date" id="round-date" name="round-date" required aria-describedby="result">
 
-      <label for="brutto-score">Brutto-Score</label>
-      <input type="number" id="brutto-score" name="brutto-score" min="1" max="200" placeholder="z.B. 85" required aria-describedby="ergebnis">
+      <label for="gross-score">Brutto-Score</label>
+      <input type="number" id="gross-score" name="gross-score" min="1" max="200" placeholder="z.B. 85" required aria-describedby="result">
 
       <label for="course-rating">Course Rating</label>
-      <input type="number" id="course-rating" name="course-rating" step="0.1" min="50" max="80" placeholder="z.B. 72.5" required aria-describedby="ergebnis">
+      <input type="number" id="course-rating" name="course-rating" step="0.1" min="50" max="80" placeholder="z.B. 72.5" required aria-describedby="result">
 
       <label for="slope-rating">Slope Rating</label>
-      <input type="number" id="slope-rating" name="slope-rating" min="55" max="155" placeholder="z.B. 128" required aria-describedby="ergebnis">
+      <input type="number" id="slope-rating" name="slope-rating" min="55" max="155" placeholder="z.B. 128" required aria-describedby="result">
 
-      <button type="submit" id="berechnen-btn">Berechnen &amp; Speichern</button>
+      <button type="submit" id="calculate-btn">Berechnen &amp; Speichern</button>
     </form>
 
-    <div id="ergebnis" class="ergebnis" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="result" class="result" role="status" aria-live="polite" aria-atomic="true"></div>
 
-    <!-- Aktuelles Handicap (oberhalb der Liste) -->
     <section class="handicap-section" id="handicap-section" aria-live="polite" aria-atomic="true">
       <h2 class="handicap-title">Aktuelles Handicap</h2>
-      <div class="handicap-wert" id="handicap-wert" aria-label="Handicap Index">—</div>
-      <p class="handicap-hinweis" id="handicap-hinweis">Beste 8 aus den letzten 20 Runden</p>
+      <div class="handicap-value" id="handicap-value" aria-label="Handicap Index">—</div>
+      <p class="handicap-hint" id="handicap-hint">Beste 8 aus den letzten 20 Runden</p>
     </section>
 
-    <!-- Meine letzten Runden -->
-    <section class="runden-section" aria-labelledby="runden-title-heading">
-      <div class="runden-header">
-        <h2 class="runden-title" id="runden-title-heading">Meine letzten Runden</h2>
-        <button type="button" class="btn-text btn-loeschen-alle" id="alle-loeschen" title="Alle Runden löschen" aria-label="Alle gespeicherten Runden löschen">Alle löschen</button>
+    <section class="rounds-section" aria-labelledby="rounds-title-heading">
+      <div class="rounds-header">
+        <h2 class="rounds-title" id="rounds-title-heading">Meine letzten Runden</h2>
+        <button type="button" class="btn-text btn-delete-all" id="delete-all" title="Alle Runden löschen" aria-label="Alle gespeicherten Runden löschen">Alle löschen</button>
       </div>
-      <div id="runden-liste" class="runden-liste" role="list" aria-label="Liste der gespeicherten Golfrunden"></div>
-      <p id="runden-leer" class="runden-leer" role="status" aria-live="polite">Noch keine Runden gespeichert.</p>
+      <div id="rounds-list" class="rounds-list" role="list" aria-label="Liste der gespeicherten Golfrunden"></div>
+      <p id="rounds-empty" class="rounds-empty" role="status" aria-live="polite">Noch keine Runden gespeichert.</p>
     </section>
   </main>
 

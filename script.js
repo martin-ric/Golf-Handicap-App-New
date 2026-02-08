@@ -1,14 +1,14 @@
 /**
  * Golf Handicap – Score Differential
- * Refactored: Modulare Struktur, robuste Validierung, verbesserte Fehlerbehandlung,
- * XSS-Schutz (nur textContent), Accessibility-Optimierungen
+ * Modular structure, validation, error handling, XSS-safe output (textContent only),
+ * accessibility improvements.
  */
 
 (function () {
   "use strict";
 
   // ============================================================================
-  // KONFIGURATION
+  // CONFIGURATION
   // ============================================================================
 
   var CONFIG = {
@@ -25,19 +25,18 @@
 
   var ValidationService = {
     /**
-     * Validiert ein Datum (YYYY-MM-DD Format).
-     * @param {string} datum - Datum-String
+     * Validates a date string (YYYY-MM-DD format).
+     * @param {string} dateString - Date string
      * @returns {{valid: boolean, error: string|null}}
      */
-    validiereDatum: function (datum) {
-      if (!datum || typeof datum !== "string") {
+    validateDate: function (dateString) {
+      if (!dateString || typeof dateString !== "string") {
         return { valid: false, error: "Bitte ein gültiges Datum angeben." };
       }
-      var trimmed = datum.trim();
+      var trimmed = dateString.trim();
       if (!trimmed) {
         return { valid: false, error: "Bitte ein Datum angeben." };
       }
-      // Prüfe Format YYYY-MM-DD
       var regex = /^\d{4}-\d{2}-\d{2}$/;
       if (!regex.test(trimmed)) {
         return { valid: false, error: "Ungültiges Datumsformat. Bitte YYYY-MM-DD verwenden." };
@@ -46,21 +45,20 @@
       if (isNaN(dateObj.getTime())) {
         return { valid: false, error: "Ungültiges Datum." };
       }
-      // Prüfe auf zukünftige Daten (max. heute)
-      var heute = new Date();
-      heute.setHours(0, 0, 0, 0);
-      if (dateObj > heute) {
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (dateObj > today) {
         return { valid: false, error: "Das Datum darf nicht in der Zukunft liegen." };
       }
       return { valid: true, error: null };
     },
 
     /**
-     * Validiert einen Brutto-Score.
-     * @param {string|number} score - Score-Wert
+     * Validates gross score input.
+     * @param {string|number} score - Score value
      * @returns {{valid: boolean, error: string|null, value: number|null}}
      */
-    validiereScore: function (score) {
+    validateScore: function (score) {
       if (score === "" || score === null || score === undefined) {
         return { valid: false, error: "Bitte einen Brutto-Score eingeben.", value: null };
       }
@@ -78,15 +76,15 @@
     },
 
     /**
-     * Validiert Course Rating.
-     * @param {string|number} cr - Course Rating
+     * Validates course rating input.
+     * @param {string|number} courseRating - Course rating value
      * @returns {{valid: boolean, error: string|null, value: number|null}}
      */
-    validiereCourseRating: function (cr) {
-      if (cr === "" || cr === null || cr === undefined) {
+    validateCourseRating: function (courseRating) {
+      if (courseRating === "" || courseRating === null || courseRating === undefined) {
         return { valid: false, error: "Bitte ein Course Rating eingeben.", value: null };
       }
-      var num = typeof cr === "string" ? parseFloat(cr) : Number(cr);
+      var num = typeof courseRating === "string" ? parseFloat(courseRating) : Number(courseRating);
       if (isNaN(num) || !isFinite(num)) {
         return { valid: false, error: "Course Rating muss eine gültige Zahl sein.", value: null };
       }
@@ -97,11 +95,11 @@
     },
 
     /**
-     * Validiert Slope Rating.
-     * @param {string|number} slope - Slope Rating
+     * Validates slope rating input.
+     * @param {string|number} slope - Slope rating value
      * @returns {{valid: boolean, error: string|null, value: number|null}}
      */
-    validiereSlope: function (slope) {
+    validateSlope: function (slope) {
       if (slope === "" || slope === null || slope === undefined) {
         return { valid: false, error: "Bitte ein Slope Rating eingeben.", value: null };
       }
@@ -119,21 +117,21 @@
     },
 
     /**
-     * Validiert eine komplette Runde.
-     * @param {Object} runde - Runden-Objekt
+     * Validates a round object (from storage).
+     * @param {Object} round - Round object
      * @returns {{valid: boolean, error: string|null}}
      */
-    validiereRunde: function (runde) {
-      if (!runde || typeof runde !== "object") {
+    validateRound: function (round) {
+      if (!round || typeof round !== "object") {
         return { valid: false, error: "Ungültiges Runden-Objekt." };
       }
       var required = ["id", "date", "score", "courseRating", "slope", "differential"];
       for (var i = 0; i < required.length; i++) {
-        if (!(required[i] in runde)) {
+        if (!(required[i] in round)) {
           return { valid: false, error: "Runden-Objekt fehlt erforderliches Feld: " + required[i] + "." };
         }
       }
-      if (typeof runde.differential !== "number" || isNaN(runde.differential)) {
+      if (typeof round.differential !== "number" || isNaN(round.differential)) {
         return { valid: false, error: "Ungültiger Differential-Wert." };
       }
       return { valid: true, error: null };
@@ -146,131 +144,187 @@
 
   var StorageService = {
     /**
-     * Runden aus LocalStorage laden mit Fehlerbehandlung.
-     * @returns {Array<Object>} Array der Runden oder leeres Array bei Fehler
+     * Load rounds from localStorage with error handling.
+     * @returns {Array<Object>} Array of rounds or empty array on error
      */
-    ladeRunden: function () {
+    loadRounds: function () {
       try {
         var raw = localStorage.getItem(CONFIG.STORAGE_KEY);
         if (!raw) return [];
         var parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) {
-          console.warn("LocalStorage enthält kein Array. Setze zurück.");
+          console.warn("LocalStorage does not contain an array. Resetting.");
           return [];
         }
-        // Validiere jede Runde
-        var validierte = [];
+        var validated = [];
         for (var i = 0; i < parsed.length; i++) {
-          var validierung = ValidationService.validiereRunde(parsed[i]);
-          if (validierung.valid) {
-            validierte.push(parsed[i]);
+          var validation = ValidationService.validateRound(parsed[i]);
+          if (validation.valid) {
+            validated.push(parsed[i]);
           } else {
-            console.warn("Ungültige Runde übersprungen:", validierung.error);
+            console.warn("Invalid round skipped:", validation.error);
           }
         }
-        return validierte;
+        return validated;
       } catch (e) {
-        console.error("Fehler beim Laden aus LocalStorage:", e);
+        console.error("Error loading from LocalStorage:", e);
         return [];
       }
     },
 
     /**
-     * Runden in LocalStorage speichern mit Fehlerbehandlung.
-     * @param {Array<Object>} runden - Array der Runden
+     * Save rounds to localStorage with error handling.
+     * @param {Array<Object>} rounds - Array of round objects
      * @returns {{success: boolean, error: string|null}}
      */
-    speichereRunden: function (runden) {
-      if (!Array.isArray(runden)) {
+    saveRounds: function (rounds) {
+      if (!Array.isArray(rounds)) {
         return { success: false, error: "Runden müssen ein Array sein." };
       }
       try {
-        var json = JSON.stringify(runden);
+        var json = JSON.stringify(rounds);
         localStorage.setItem(CONFIG.STORAGE_KEY, json);
         return { success: true, error: null };
       } catch (e) {
         if (e.name === "QuotaExceededError") {
           return { success: false, error: "Speicherplatz voll. Bitte alte Runden löschen." };
         }
-        console.error("Fehler beim Speichern in LocalStorage:", e);
+        console.error("Error saving to LocalStorage:", e);
         return { success: false, error: "Fehler beim Speichern: " + e.message };
       }
     },
 
     /**
-     * Alle Runden löschen.
+     * Delete all rounds from localStorage.
      * @returns {{success: boolean, error: string|null}}
      */
-    loescheAlle: function () {
+    deleteAll: function () {
       try {
         localStorage.removeItem(CONFIG.STORAGE_KEY);
         return { success: true, error: null };
       } catch (e) {
-        console.error("Fehler beim Löschen aus LocalStorage:", e);
+        console.error("Error deleting from LocalStorage:", e);
         return { success: false, error: "Fehler beim Löschen: " + e.message };
       }
     }
   };
 
   // ============================================================================
-  // WHS SERVICE (World Handicap System Berechnungen)
+  // WHS SERVICE (World Handicap System calculations)
   // ============================================================================
 
   var WHSService = {
     /**
-     * Berechnet Score Differential nach WHS-Formel.
-     * Formel: (113 / Slope) * (Score - Course Rating)
-     * @param {number} score - Brutto-Score
-     * @param {number} courseRating - Course Rating
-     * @param {number} slope - Slope Rating
-     * @returns {number} Score Differential (auf 1 Dezimalstelle gerundet)
+     * Calculate score differential using WHS formula.
+     * Formula: (113 / Slope) * (Score - Course Rating)
+     * @param {number} score - Gross score
+     * @param {number} courseRating - Course rating
+     * @param {number} slope - Slope rating
+     * @returns {number} Score differential rounded to one decimal place
      */
-    berechneScoreDifferential: function (score, courseRating, slope) {
-      var differential = (CONFIG.CONSTANT_SLOPE / slope) * (score - courseRating);
-      return Math.round(differential * 10) / 10;
+    calculateScoreDifferential: function (score, courseRating, slope) {
+      var scoreDifferential = (CONFIG.CONSTANT_SLOPE / slope) * (score - courseRating);
+      return Math.round(scoreDifferential * 10) / 10;
     },
 
     /**
-     * Berechnet Handicap-Index nach WHS: beste 8 aus letzten 20 Runden.
-     * @param {Array<Object>} runden - Alle Runden (neueste zuerst)
-     * @returns {number|null} Handicap-Index oder null wenn zu wenig Daten
+     * Get WHS calculation parameters based on number of rounds.
+     * Implements the official WHS sliding scale.
+     * @param {number} roundCount - Number of rounds available
+     * @returns {{countToUse: number, adjustment: number}} Number of best rounds to use and adjustment to apply
      */
-    berechneHandicapIndex: function (runden) {
-      if (!runden || runden.length === 0) {
-        return null;
+    getWHSCalculationParams: function (roundCount) {
+      if (roundCount <= 0) {
+        return { countToUse: 0, adjustment: 0 };
       }
-      var letzte20 = runden.slice(0, CONFIG.MAX_ROUNDS_FOR_HANDICAP);
-      // Sortiere nach Differential (aufsteigend = beste zuerst)
-      var sortiert = letzte20.slice().sort(function (a, b) {
+      if (roundCount >= 1 && roundCount <= 3) {
+        return { countToUse: 1, adjustment: -2.0 };
+      }
+      if (roundCount >= 4 && roundCount <= 5) {
+        return { countToUse: 1, adjustment: 0 };
+      }
+      if (roundCount === 6) {
+        return { countToUse: 2, adjustment: -1.0 };
+      }
+      if (roundCount >= 7 && roundCount <= 8) {
+        return { countToUse: 2, adjustment: 0 };
+      }
+      if (roundCount >= 9 && roundCount <= 11) {
+        return { countToUse: 3, adjustment: 0 };
+      }
+      if (roundCount >= 12 && roundCount <= 14) {
+        return { countToUse: 4, adjustment: 0 };
+      }
+      if (roundCount >= 15 && roundCount <= 16) {
+        return { countToUse: 5, adjustment: 0 };
+      }
+      if (roundCount >= 17 && roundCount <= 18) {
+        return { countToUse: 6, adjustment: 0 };
+      }
+      if (roundCount === 19) {
+        return { countToUse: 7, adjustment: 0 };
+      }
+      // 20 or more rounds
+      return { countToUse: 8, adjustment: 0 };
+    },
+
+    /**
+     * Calculate handicap index using official WHS sliding scale.
+     * Only considers the most recent 20 rounds if more than 20 are available.
+     * @param {Array<Object>} rounds - All rounds (newest first)
+     * @returns {{handicap: number|null, roundsUsed: number, bestRoundsUsed: number, adjustment: number}}
+     */
+    calculateHandicapIndex: function (rounds) {
+      if (!rounds || rounds.length === 0) {
+        return { handicap: null, roundsUsed: 0, bestRoundsUsed: 0, adjustment: 0 };
+      }
+      
+      // Take only the most recent 20 rounds
+      var roundsToConsider = rounds.slice(0, CONFIG.MAX_ROUNDS_FOR_HANDICAP);
+      var roundsUsed = roundsToConsider.length;
+      
+      // Get WHS calculation parameters based on number of rounds
+      var params = this.getWHSCalculationParams(roundsUsed);
+      
+      if (params.countToUse === 0) {
+        return { handicap: null, roundsUsed: roundsUsed, bestRoundsUsed: 0, adjustment: 0 };
+      }
+      
+      // Sort by differential (ascending = best first)
+      var sortedByDifferential = roundsToConsider.slice().sort(function (a, b) {
         return a.differential - b.differential;
       });
-      var anzahlBeste = Math.min(CONFIG.BEST_ROUNDS_COUNT, sortiert.length);
-      var beste = sortiert.slice(0, anzahlBeste);
-      // Durchschnitt berechnen
-      var summe = beste.reduce(function (acc, r) {
+      
+      // Take the best rounds
+      var bestRounds = sortedByDifferential.slice(0, params.countToUse);
+      
+      // Calculate average
+      var sum = bestRounds.reduce(function (acc, r) {
         return acc + r.differential;
       }, 0);
-      var durchschnitt = summe / anzahlBeste;
-      // WHS-Multiplikator anwenden
-      var handicap = Math.round(durchschnitt * CONFIG.WHS_MULTIPLIER * 10) / 10;
-      return handicap;
+      var average = sum / params.countToUse;
+      
+      // Apply adjustment
+      var adjustedAverage = average + params.adjustment;
+      
+      // Round to one decimal place
+      var handicapIndex = Math.round(adjustedAverage * 10) / 10;
+      
+      return {
+        handicap: handicapIndex,
+        roundsUsed: roundsUsed,
+        bestRoundsUsed: params.countToUse,
+        adjustment: params.adjustment
+      };
     },
 
     /**
-     * Gibt Informationen über die Handicap-Berechnung zurück.
-     * @param {Array<Object>} runden - Alle Runden
-     * @returns {{handicap: number|null, verwendeteRunden: number, gesamtRunden: number}}
+     * Return handicap calculation info for display.
+     * @param {Array<Object>} rounds - All rounds (newest first)
+     * @returns {{handicap: number|null, roundsUsed: number, bestRoundsUsed: number, adjustment: number}}
      */
-    getHandicapInfo: function (runden) {
-      var gesamt = runden.length;
-      var verwendete = Math.min(CONFIG.MAX_ROUNDS_FOR_HANDICAP, gesamt);
-      var beste = Math.min(CONFIG.BEST_ROUNDS_COUNT, verwendete);
-      var handicap = this.berechneHandicapIndex(runden);
-      return {
-        handicap: handicap,
-        verwendeteRunden: beste,
-        gesamtRunden: verwendete
-      };
+    getHandicapInfo: function (rounds) {
+      return this.calculateHandicapIndex(rounds);
     }
   };
 
@@ -280,326 +334,315 @@
 
   var UIService = {
     /**
-     * Formatiert Datum von YYYY-MM-DD zu DD.MM.YYYY.
-     * @param {string} iso - ISO-Datum
-     * @returns {string} Formatiertes Datum
+     * Format date from YYYY-MM-DD to DD.MM.YYYY.
+     * @param {string} isoDate - ISO date string
+     * @returns {string} Formatted date string
      */
-    formatDatum: function (iso) {
-      var teile = iso.split("-");
-      if (teile.length !== 3) return iso;
-      return teile[2] + "." + teile[1] + "." + teile[0];
+    formatDate: function (isoDate) {
+      var parts = isoDate.split("-");
+      if (parts.length !== 3) return isoDate;
+      return parts[2] + "." + parts[1] + "." + parts[0];
     },
 
     /**
-     * Setzt heutiges Datum in ein date-Input-Feld.
-     * @param {HTMLInputElement} input - Datum-Input-Element
+     * Set today's date in a date input field.
+     * @param {HTMLInputElement} input - Date input element
      */
-    setzeHeute: function (input) {
+    setToday: function (input) {
       if (!input || input.type !== "date") return;
-      var heute = new Date();
-      var j = heute.getFullYear();
-      var m = String(heute.getMonth() + 1).padStart(2, "0");
-      var t = String(heute.getDate()).padStart(2, "0");
-      input.value = j + "-" + m + "-" + t;
+      var today = new Date();
+      var year = today.getFullYear();
+      var month = String(today.getMonth() + 1).padStart(2, "0");
+      var day = String(today.getDate()).padStart(2, "0");
+      input.value = year + "-" + month + "-" + day;
     },
 
     /**
-     * Zeigt eine Fehlermeldung an (nur textContent, XSS-sicher).
-     * @param {HTMLElement} container - Container-Element
-     * @param {string} nachricht - Fehlermeldung
+     * Show an error message (textContent only, XSS-safe).
+     * @param {HTMLElement} container - Container element
+     * @param {string} message - Error message
      */
-    zeigeFehler: function (container, nachricht) {
+    showError: function (container, message) {
       if (!container) return;
       container.textContent = "";
-      container.classList.remove("sichtbar");
+      container.classList.remove("visible");
       requestAnimationFrame(function () {
-        container.textContent = nachricht || "Ein Fehler ist aufgetreten.";
-        container.classList.add("sichtbar");
+        container.textContent = message || "Ein Fehler ist aufgetreten.";
+        container.classList.add("visible");
         container.setAttribute("role", "alert");
         container.setAttribute("aria-live", "assertive");
       });
     },
 
     /**
-     * Zeigt ein Ergebnis an (nur textContent, XSS-sicher).
-     * @param {HTMLElement} container - Container-Element
-     * @param {number} differential - Score Differential
+     * Show result (score differential) in container (textContent only, XSS-safe).
+     * @param {HTMLElement} container - Container element
+     * @param {number} scoreDifferential - Score differential value
      */
-    zeigeErgebnis: function (container, differential) {
+    showResult: function (container, scoreDifferential) {
       if (!container) return;
       container.textContent = "";
-      container.classList.remove("sichtbar");
+      container.classList.remove("visible");
       requestAnimationFrame(function () {
-        container.classList.add("sichtbar");
+        container.classList.add("visible");
         container.removeAttribute("role");
         container.setAttribute("aria-live", "polite");
         var label = document.createElement("span");
         label.textContent = "Score Differential";
-        var wert = document.createElement("span");
-        wert.className = "wert";
-        wert.textContent = String(differential);
+        var valueEl = document.createElement("span");
+        valueEl.className = "value";
+        valueEl.textContent = String(scoreDifferential);
         container.appendChild(label);
-        container.appendChild(wert);
+        container.appendChild(valueEl);
       });
     },
 
     /**
-     * Leert den Ergebnis-Container.
-     * @param {HTMLElement} container - Container-Element
+     * Clear the result/error container.
+     * @param {HTMLElement} container - Container element
      */
-    leereErgebnis: function (container) {
+    clearResult: function (container) {
       if (!container) return;
       container.textContent = "";
-      container.classList.remove("sichtbar");
+      container.classList.remove("visible");
       container.removeAttribute("role");
     }
   };
 
   // ============================================================================
-  // APPLICATION (Hauptlogik)
+  // APPLICATION (main logic)
   // ============================================================================
 
   var App = {
-    // DOM-Referenzen
     elements: {
       form: null,
-      datumInput: null,
-      bruttoInput: null,
+      roundDateInput: null,
+      grossScoreInput: null,
       courseRatingInput: null,
       slopeInput: null,
-      ergebnisDiv: null,
-      handicapWert: null,
-      handicapHinweis: null,
-      rundenListe: null,
-      rundenLeer: null,
-      btnAlleLoeschen: null
+      resultContainer: null,
+      handicapValue: null,
+      handicapHint: null,
+      roundsList: null,
+      roundsEmpty: null,
+      deleteAllButton: null
     },
 
     /**
-     * Initialisiert die App.
+     * Initialize the application.
      */
     init: function () {
-      // DOM-Referenzen sammeln
       this.elements.form = document.getElementById("handicap-form");
-      this.elements.datumInput = document.getElementById("runden-datum");
-      this.elements.bruttoInput = document.getElementById("brutto-score");
+      this.elements.roundDateInput = document.getElementById("round-date");
+      this.elements.grossScoreInput = document.getElementById("gross-score");
       this.elements.courseRatingInput = document.getElementById("course-rating");
       this.elements.slopeInput = document.getElementById("slope-rating");
-      this.elements.ergebnisDiv = document.getElementById("ergebnis");
-      this.elements.handicapWert = document.getElementById("handicap-wert");
-      this.elements.handicapHinweis = document.getElementById("handicap-hinweis");
-      this.elements.rundenListe = document.getElementById("runden-liste");
-      this.elements.rundenLeer = document.getElementById("runden-leer");
-      this.elements.btnAlleLoeschen = document.getElementById("alle-loeschen");
+      this.elements.resultContainer = document.getElementById("result");
+      this.elements.handicapValue = document.getElementById("handicap-value");
+      this.elements.handicapHint = document.getElementById("handicap-hint");
+      this.elements.roundsList = document.getElementById("rounds-list");
+      this.elements.roundsEmpty = document.getElementById("rounds-empty");
+      this.elements.deleteAllButton = document.getElementById("delete-all");
 
-      // Prüfe ob alle Elemente vorhanden sind
-      var fehlend = [];
+      var missingElements = [];
       for (var key in this.elements) {
         if (!this.elements[key]) {
-          fehlend.push(key);
+          missingElements.push(key);
         }
       }
-      if (fehlend.length > 0) {
-        console.error("Fehlende DOM-Elemente:", fehlend);
+      if (missingElements.length > 0) {
+        console.error("Missing DOM elements:", missingElements);
         return;
       }
 
-      // Event-Listener registrieren
       this.elements.form.addEventListener("submit", this.handleSubmit.bind(this));
-      this.elements.btnAlleLoeschen.addEventListener("click", this.handleAlleLoeschen.bind(this));
+      this.elements.deleteAllButton.addEventListener("click", this.handleDeleteAll.bind(this));
 
-      // Initialisierung
-      UIService.setzeHeute(this.elements.datumInput);
-      this.aktualisiereUI();
+      UIService.setToday(this.elements.roundDateInput);
+      this.updateUI();
     },
 
     /**
-     * Behandelt Formular-Submit.
-     * @param {Event} event - Submit-Event
+     * Handle form submit.
+     * @param {Event} event - Submit event
      */
     handleSubmit: function (event) {
       event.preventDefault();
-      UIService.leereErgebnis(this.elements.ergebnisDiv);
+      UIService.clearResult(this.elements.resultContainer);
 
-      // Eingaben lesen
-      var datumRaw = this.elements.datumInput.value;
-      var scoreRaw = this.elements.bruttoInput.value;
-      var crRaw = this.elements.courseRatingInput.value;
+      var dateRaw = this.elements.roundDateInput.value;
+      var scoreRaw = this.elements.grossScoreInput.value;
+      var courseRatingRaw = this.elements.courseRatingInput.value;
       var slopeRaw = this.elements.slopeInput.value;
 
-      // Validierung
-      var datumVal = ValidationService.validiereDatum(datumRaw);
-      if (!datumVal.valid) {
-        UIService.zeigeFehler(this.elements.ergebnisDiv, datumVal.error);
-        this.elements.datumInput.setAttribute("aria-invalid", "true");
-        this.elements.datumInput.focus();
+      var dateValidation = ValidationService.validateDate(dateRaw);
+      if (!dateValidation.valid) {
+        UIService.showError(this.elements.resultContainer, dateValidation.error);
+        this.elements.roundDateInput.setAttribute("aria-invalid", "true");
+        this.elements.roundDateInput.focus();
         return;
       }
-      this.elements.datumInput.removeAttribute("aria-invalid");
+      this.elements.roundDateInput.removeAttribute("aria-invalid");
 
-      var scoreVal = ValidationService.validiereScore(scoreRaw);
-      if (!scoreVal.valid) {
-        UIService.zeigeFehler(this.elements.ergebnisDiv, scoreVal.error);
-        this.elements.bruttoInput.setAttribute("aria-invalid", "true");
-        this.elements.bruttoInput.focus();
+      var scoreValidation = ValidationService.validateScore(scoreRaw);
+      if (!scoreValidation.valid) {
+        UIService.showError(this.elements.resultContainer, scoreValidation.error);
+        this.elements.grossScoreInput.setAttribute("aria-invalid", "true");
+        this.elements.grossScoreInput.focus();
         return;
       }
-      this.elements.bruttoInput.removeAttribute("aria-invalid");
+      this.elements.grossScoreInput.removeAttribute("aria-invalid");
 
-      var crVal = ValidationService.validiereCourseRating(crRaw);
-      if (!crVal.valid) {
-        UIService.zeigeFehler(this.elements.ergebnisDiv, crVal.error);
+      var courseRatingValidation = ValidationService.validateCourseRating(courseRatingRaw);
+      if (!courseRatingValidation.valid) {
+        UIService.showError(this.elements.resultContainer, courseRatingValidation.error);
         this.elements.courseRatingInput.setAttribute("aria-invalid", "true");
         this.elements.courseRatingInput.focus();
         return;
       }
       this.elements.courseRatingInput.removeAttribute("aria-invalid");
 
-      var slopeVal = ValidationService.validiereSlope(slopeRaw);
-      if (!slopeVal.valid) {
-        UIService.zeigeFehler(this.elements.ergebnisDiv, slopeVal.error);
+      var slopeValidation = ValidationService.validateSlope(slopeRaw);
+      if (!slopeValidation.valid) {
+        UIService.showError(this.elements.resultContainer, slopeValidation.error);
         this.elements.slopeInput.setAttribute("aria-invalid", "true");
         this.elements.slopeInput.focus();
         return;
       }
       this.elements.slopeInput.removeAttribute("aria-invalid");
 
-      // Berechnung
-      var differential = WHSService.berechneScoreDifferential(
-        scoreVal.value,
-        crVal.value,
-        slopeVal.value
+      var scoreDifferential = WHSService.calculateScoreDifferential(
+        scoreValidation.value,
+        courseRatingValidation.value,
+        slopeValidation.value
       );
-      UIService.zeigeErgebnis(this.elements.ergebnisDiv, differential);
+      UIService.showResult(this.elements.resultContainer, scoreDifferential);
 
-      // Speichern
-      var runden = StorageService.ladeRunden();
-      var neueRunde = {
+      var rounds = StorageService.loadRounds();
+      var newRound = {
         id: String(Date.now()),
-        date: datumRaw.trim(),
-        score: scoreVal.value,
-        courseRating: crVal.value,
-        slope: slopeVal.value,
-        differential: differential
+        date: dateRaw.trim(),
+        score: scoreValidation.value,
+        courseRating: courseRatingValidation.value,
+        slope: slopeValidation.value,
+        differential: scoreDifferential
       };
-      runden.unshift(neueRunde);
-      var speicherErgebnis = StorageService.speichereRunden(runden);
-      if (!speicherErgebnis.success) {
-        UIService.zeigeFehler(this.elements.ergebnisDiv, speicherErgebnis.error);
+      rounds.unshift(newRound);
+      var saveResult = StorageService.saveRounds(rounds);
+      if (!saveResult.success) {
+        UIService.showError(this.elements.resultContainer, saveResult.error);
         return;
       }
 
-      // UI aktualisieren
-      this.aktualisiereUI();
+      this.updateUI();
     },
 
     /**
-     * Behandelt "Alle löschen"-Klick.
+     * Handle "Delete all" button click.
      */
-    handleAlleLoeschen: function () {
-      var runden = StorageService.ladeRunden();
-      if (runden.length === 0) return;
+    handleDeleteAll: function () {
+      var rounds = StorageService.loadRounds();
+      if (rounds.length === 0) return;
       if (!confirm("Wirklich alle gespeicherten Runden löschen?")) return;
-      var loeschErgebnis = StorageService.loescheAlle();
-      if (!loeschErgebnis.success) {
-        alert("Fehler beim Löschen: " + loeschErgebnis.error);
+      var deleteResult = StorageService.deleteAll();
+      if (!deleteResult.success) {
+        alert("Fehler beim Löschen: " + deleteResult.error);
         return;
       }
-      UIService.leereErgebnis(this.elements.ergebnisDiv);
-      this.aktualisiereUI();
+      UIService.clearResult(this.elements.resultContainer);
+      this.updateUI();
     },
 
     /**
-     * Löscht eine einzelne Runde.
-     * @param {string} id - Runden-ID
+     * Delete a single round by id.
+     * @param {string} roundId - Round id
      */
-    loescheRunde: function (id) {
-      var runden = StorageService.ladeRunden().filter(function (r) {
-        return r.id !== id;
+    deleteRound: function (roundId) {
+      var rounds = StorageService.loadRounds().filter(function (r) {
+        return r.id !== roundId;
       });
-      var speicherErgebnis = StorageService.speichereRunden(runden);
-      if (!speicherErgebnis.success) {
-        alert("Fehler beim Löschen: " + speicherErgebnis.error);
+      var saveResult = StorageService.saveRounds(rounds);
+      if (!saveResult.success) {
+        alert("Fehler beim Löschen: " + saveResult.error);
         return;
       }
-      this.aktualisiereUI();
+      this.updateUI();
     },
 
     /**
-     * Aktualisiert Handicap-Anzeige.
+     * Update handicap display.
      */
-    aktualisiereHandicap: function () {
-      var runden = StorageService.ladeRunden();
-      var neuesteZuerst = runden.slice().sort(function (a, b) {
+    updateHandicap: function () {
+      var rounds = StorageService.loadRounds();
+      var newestFirst = rounds.slice().sort(function (a, b) {
         return b.date.localeCompare(a.date);
       });
-      var info = WHSService.getHandicapInfo(neuesteZuerst);
+      var info = WHSService.getHandicapInfo(newestFirst);
       if (info.handicap !== null) {
-        this.elements.handicapWert.textContent = String(info.handicap);
-        var hinweis = "Beste " + info.verwendeteRunden + " aus den letzten " + info.gesamtRunden + " Runden";
-        this.elements.handicapHinweis.textContent = hinweis;
+        this.elements.handicapValue.textContent = String(info.handicap);
+        var hintText = "Based on your best " + info.bestRoundsUsed + " out of " + info.roundsUsed + " rounds";
+        this.elements.handicapHint.textContent = hintText;
       } else {
-        this.elements.handicapWert.textContent = "—";
-        this.elements.handicapHinweis.textContent = "Beste " + CONFIG.BEST_ROUNDS_COUNT + " aus den letzten " + CONFIG.MAX_ROUNDS_FOR_HANDICAP + " Runden";
+        this.elements.handicapValue.textContent = "—";
+        this.elements.handicapHint.textContent = "At least 1 round required";
       }
     },
 
     /**
-     * Rendert die Runden-Liste (nur textContent, XSS-sicher).
+     * Render the rounds list (textContent only, XSS-safe).
      */
-    rendereRundenListe: function () {
-      this.elements.rundenListe.textContent = "";
-      var runden = StorageService.ladeRunden();
-      var neuesteZuerst = runden.slice().sort(function (a, b) {
+    renderRoundsList: function () {
+      this.elements.roundsList.textContent = "";
+      var rounds = StorageService.loadRounds();
+      var newestFirst = rounds.slice().sort(function (a, b) {
         return b.date.localeCompare(a.date);
       });
 
-      // "Alle löschen"-Button anzeigen/verstecken
-      this.elements.btnAlleLoeschen.style.display = neuesteZuerst.length > 0 ? "" : "none";
+      this.elements.deleteAllButton.style.display = newestFirst.length > 0 ? "" : "none";
 
-      neuesteZuerst.forEach(function (r) {
-        var karte = document.createElement("div");
-        karte.className = "runden-karte";
-        karte.setAttribute("data-id", r.id);
-        karte.setAttribute("role", "listitem");
+      var app = this;
+      newestFirst.forEach(function (round) {
+        var card = document.createElement("div");
+        card.className = "round-card";
+        card.setAttribute("data-id", round.id);
+        card.setAttribute("role", "listitem");
 
-        var datumSpan = document.createElement("span");
-        datumSpan.className = "runden-karte-datum";
-        datumSpan.textContent = UIService.formatDatum(r.date);
+        var dateSpan = document.createElement("span");
+        dateSpan.className = "round-card-date";
+        dateSpan.textContent = UIService.formatDate(round.date);
 
-        var diffSpan = document.createElement("span");
-        diffSpan.className = "runden-karte-differential";
-        diffSpan.textContent = "Diff. " + String(r.differential);
+        var differentialSpan = document.createElement("span");
+        differentialSpan.className = "round-card-differential";
+        differentialSpan.textContent = "Diff. " + String(round.differential);
 
-        var btnLoeschen = document.createElement("button");
-        btnLoeschen.type = "button";
-        btnLoeschen.className = "btn-runde-loeschen";
-        btnLoeschen.title = "Runde löschen";
-        btnLoeschen.setAttribute("aria-label", "Runde vom " + UIService.formatDatum(r.date) + " löschen");
-        btnLoeschen.textContent = "×";
-        var app = this;
-        btnLoeschen.addEventListener("click", function () {
-          app.loescheRunde(r.id);
+        var deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "btn-round-delete";
+        deleteButton.title = "Runde löschen";
+        deleteButton.setAttribute("aria-label", "Runde vom " + UIService.formatDate(round.date) + " löschen");
+        deleteButton.textContent = "×";
+        deleteButton.addEventListener("click", function () {
+          app.deleteRound(round.id);
         });
 
         var details = document.createElement("div");
-        details.className = "runden-karte-details";
-        details.textContent = "Score " + String(r.score) + " · CR " + String(r.courseRating) + " · Slope " + String(r.slope);
+        details.className = "round-card-details";
+        details.textContent = "Score " + String(round.score) + " · CR " + String(round.courseRating) + " · Slope " + String(round.slope);
 
-        karte.appendChild(datumSpan);
-        karte.appendChild(diffSpan);
-        karte.appendChild(btnLoeschen);
-        karte.appendChild(details);
-        this.elements.rundenListe.appendChild(karte);
-      }, this);
+        card.appendChild(dateSpan);
+        card.appendChild(differentialSpan);
+        card.appendChild(deleteButton);
+        card.appendChild(details);
+        app.elements.roundsList.appendChild(card);
+      });
     },
 
     /**
-     * Aktualisiert die gesamte UI (Handicap + Liste).
+     * Update full UI (handicap + rounds list).
      */
-    aktualisiereUI: function () {
-      this.aktualisiereHandicap();
-      this.rendereRundenListe();
+    updateUI: function () {
+      this.updateHandicap();
+      this.renderRoundsList();
     }
   };
 
@@ -607,7 +650,6 @@
   // START
   // ============================================================================
 
-  // Warte bis DOM geladen ist
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () {
       App.init();

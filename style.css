@@ -1,6 +1,6 @@
 /* ============================================
    Golf Handicap – Score Differential
-   Clean, minimalistisch
+   Clean, minimal design
    ============================================ */
 
 *,
@@ -29,7 +29,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Card – Off-White, dezente Schatten */
+/* Card – off-white background, subtle shadow */
 .container {
   width: 100%;
   min-width: 0;
@@ -41,7 +41,7 @@ body {
   box-shadow: 0 2px 16px rgba(10, 31, 22, 0.06);
 }
 
-/* Überschrift */
+/* Heading */
 h1 {
   margin: 0 0 0.25rem 0;
   font-size: 1.75rem;
@@ -59,7 +59,7 @@ h1 {
   text-align: center;
 }
 
-/* Formular */
+/* Form */
 .form {
   display: flex;
   flex-direction: column;
@@ -73,7 +73,7 @@ h1 {
   margin-bottom: -0.2rem;
 }
 
-/* Eingabefelder – dezente Umrandung, Fokus in Forest Green */
+/* Input fields – subtle border, focus state in forest green */
 .form input {
   width: 100%;
   padding: 0.85rem 1rem;
@@ -120,7 +120,7 @@ h1 {
   margin: 0;
 }
 
-/* Button – Forest Green, geringer Radius */
+/* Submit button – forest green, small radius */
 .form button {
   margin-top: 0.5rem;
   padding: 1rem 1.5rem;
@@ -145,8 +145,8 @@ h1 {
   transition-duration: 0.1s;
 }
 
-/* Ergebnisbereich */
-.ergebnis {
+/* Result area (score differential output) */
+.result {
   margin-top: 1.75rem;
   min-height: 3rem;
   padding: 1.25rem 1rem;
@@ -159,14 +159,14 @@ h1 {
   transition: opacity 0.15s ease;
 }
 
-.ergebnis.sichtbar {
+.result.visible {
   opacity: 1;
-  animation: ergebnisEinblenden 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: resultFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   background: #f8f9fa;
   border: 1px solid rgba(10, 31, 22, 0.06);
 }
 
-.ergebnis .wert {
+.result .value {
   display: block;
   margin-top: 0.35rem;
   font-size: 1.75rem;
@@ -175,7 +175,7 @@ h1 {
   color: #0a1f16;
 }
 
-@keyframes ergebnisEinblenden {
+@keyframes resultFadeIn {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -186,7 +186,7 @@ h1 {
   }
 }
 
-/* Handicap-Bereich (oberhalb der Liste) */
+/* Handicap section (above rounds list) */
 .handicap-section {
   margin-top: 2.25rem;
   padding-top: 1.75rem;
@@ -203,27 +203,27 @@ h1 {
   text-transform: uppercase;
 }
 
-.handicap-wert {
+.handicap-value {
   font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #0a1f16;
 }
 
-.handicap-hinweis {
+.handicap-hint {
   margin: 0.5rem 0 0 0;
   font-size: 0.8125rem;
   color: rgba(10, 31, 22, 0.5);
 }
 
-/* Meine letzten Runden */
-.runden-section {
+/* Rounds list section */
+.rounds-section {
   margin-top: 2rem;
   padding-top: 1.75rem;
   border-top: 1px solid rgba(10, 31, 22, 0.08);
 }
 
-.runden-header {
+.rounds-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -231,7 +231,7 @@ h1 {
   margin-bottom: 1rem;
 }
 
-.runden-title {
+.rounds-title {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
@@ -256,22 +256,22 @@ h1 {
   background: rgba(10, 31, 22, 0.06);
 }
 
-.btn-loeschen-alle:hover {
+.btn-delete-all:hover {
   color: #b91c1c;
   background: rgba(185, 28, 28, 0.06);
 }
 
-.runden-liste {
+.rounds-list {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.runden-liste:not(:empty) + .runden-leer {
+.rounds-list:not(:empty) + .rounds-empty {
   display: none;
 }
 
-.runden-karte {
+.round-card {
   display: grid;
   grid-template-columns: 1fr auto auto;
   gap: 0.75rem 1rem;
@@ -281,10 +281,10 @@ h1 {
   border: 1px solid rgba(10, 31, 22, 0.06);
   border-radius: 8px;
   font-size: 0.875rem;
-  animation: karteEinblenden 0.3s ease-out;
+  animation: cardFadeIn 0.3s ease-out;
 }
 
-@keyframes karteEinblenden {
+@keyframes cardFadeIn {
   from {
     opacity: 0;
     transform: translateY(4px);
@@ -295,12 +295,12 @@ h1 {
   }
 }
 
-.runden-karte-datum {
+.round-card-date {
   font-weight: 600;
   color: #0a1f16;
 }
 
-.runden-karte-details {
+.round-card-details {
   grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
@@ -309,12 +309,12 @@ h1 {
   color: rgba(10, 31, 22, 0.65);
 }
 
-.runden-karte-differential {
+.round-card-differential {
   font-weight: 600;
   color: #0a1f16;
 }
 
-.btn-runde-loeschen {
+.btn-round-delete {
   grid-row: 1;
   grid-column: 3;
   width: 32px;
@@ -331,12 +331,12 @@ h1 {
   flex-shrink: 0;
 }
 
-.btn-runde-loeschen:hover {
+.btn-round-delete:hover {
   color: #b91c1c;
   background: rgba(185, 28, 28, 0.08);
 }
 
-.runden-leer {
+.rounds-empty {
   margin: 0;
   padding: 1.25rem 1rem;
   font-size: 0.875rem;
@@ -374,11 +374,11 @@ h1 {
     border-radius: 8px;
   }
 
-  .ergebnis {
+  .result {
     border-radius: 8px;
   }
 
-  .ergebnis .wert {
+  .result .value {
     font-size: 1.5rem;
   }
 }
