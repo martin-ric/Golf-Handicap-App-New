@@ -1,7 +1,7 @@
 /**
  * Golf Handicap – Score Differential
  * Modular structure, validation, error handling, XSS-safe output (textContent only),
- * accessibility improvements.
+ * and accessibility improvements.
  */
 
 (function () {
@@ -31,24 +31,24 @@
      */
     validateDate: function (dateString) {
       if (!dateString || typeof dateString !== "string") {
-        return { valid: false, error: "Bitte ein gültiges Datum angeben." };
+        return { valid: false, error: "Please provide a valid date." };
       }
       var trimmed = dateString.trim();
       if (!trimmed) {
-        return { valid: false, error: "Bitte ein Datum angeben." };
+        return { valid: false, error: "Please provide a date." };
       }
       var regex = /^\d{4}-\d{2}-\d{2}$/;
       if (!regex.test(trimmed)) {
-        return { valid: false, error: "Ungültiges Datumsformat. Bitte YYYY-MM-DD verwenden." };
+        return { valid: false, error: "Invalid date format. Please use YYYY-MM-DD." };
       }
       var dateObj = new Date(trimmed + "T00:00:00");
       if (isNaN(dateObj.getTime())) {
-        return { valid: false, error: "Ungültiges Datum." };
+        return { valid: false, error: "Invalid date." };
       }
       var today = new Date();
       today.setHours(0, 0, 0, 0);
       if (dateObj > today) {
-        return { valid: false, error: "Das Datum darf nicht in der Zukunft liegen." };
+        return { valid: false, error: "The date cannot be in the future." };
       }
       return { valid: true, error: null };
     },
@@ -60,17 +60,17 @@
      */
     validateScore: function (score) {
       if (score === "" || score === null || score === undefined) {
-        return { valid: false, error: "Bitte einen Brutto-Score eingeben.", value: null };
+        return { valid: false, error: "Please enter a gross score.", value: null };
       }
       var num = typeof score === "string" ? parseFloat(score) : Number(score);
       if (isNaN(num) || !isFinite(num)) {
-        return { valid: false, error: "Brutto-Score muss eine gültige Zahl sein.", value: null };
+        return { valid: false, error: "Gross score must be a valid number.", value: null };
       }
       if (num < 1 || num > 200) {
-        return { valid: false, error: "Brutto-Score muss zwischen 1 und 200 liegen.", value: null };
+        return { valid: false, error: "Gross score must be between 1 and 200.", value: null };
       }
       if (num !== Math.floor(num)) {
-        return { valid: false, error: "Brutto-Score muss eine ganze Zahl sein.", value: null };
+        return { valid: false, error: "Gross score must be a whole number.", value: null };
       }
       return { valid: true, error: null, value: num };
     },
@@ -82,14 +82,14 @@
      */
     validateCourseRating: function (courseRating) {
       if (courseRating === "" || courseRating === null || courseRating === undefined) {
-        return { valid: false, error: "Bitte ein Course Rating eingeben.", value: null };
+        return { valid: false, error: "Please enter a course rating.", value: null };
       }
       var num = typeof courseRating === "string" ? parseFloat(courseRating) : Number(courseRating);
       if (isNaN(num) || !isFinite(num)) {
-        return { valid: false, error: "Course Rating muss eine gültige Zahl sein.", value: null };
+        return { valid: false, error: "Course rating must be a valid number.", value: null };
       }
       if (num < 50 || num > 80) {
-        return { valid: false, error: "Course Rating muss zwischen 50 und 80 liegen.", value: null };
+        return { valid: false, error: "Course rating must be between 50 and 80.", value: null };
       }
       return { valid: true, error: null, value: num };
     },
@@ -101,17 +101,17 @@
      */
     validateSlope: function (slope) {
       if (slope === "" || slope === null || slope === undefined) {
-        return { valid: false, error: "Bitte ein Slope Rating eingeben.", value: null };
+        return { valid: false, error: "Please enter a slope rating.", value: null };
       }
       var num = typeof slope === "string" ? parseFloat(slope) : Number(slope);
       if (isNaN(num) || !isFinite(num)) {
-        return { valid: false, error: "Slope Rating muss eine gültige Zahl sein.", value: null };
+        return { valid: false, error: "Slope rating must be a valid number.", value: null };
       }
       if (num < 55 || num > 155) {
-        return { valid: false, error: "Slope Rating muss zwischen 55 und 155 liegen.", value: null };
+        return { valid: false, error: "Slope rating must be between 55 and 155.", value: null };
       }
       if (num !== Math.floor(num)) {
-        return { valid: false, error: "Slope Rating muss eine ganze Zahl sein.", value: null };
+        return { valid: false, error: "Slope rating must be a whole number.", value: null };
       }
       return { valid: true, error: null, value: num };
     },
@@ -123,16 +123,16 @@
      */
     validateRound: function (round) {
       if (!round || typeof round !== "object") {
-        return { valid: false, error: "Ungültiges Runden-Objekt." };
+        return { valid: false, error: "Invalid round object." };
       }
       var required = ["id", "date", "score", "courseRating", "slope", "differential"];
       for (var i = 0; i < required.length; i++) {
         if (!(required[i] in round)) {
-          return { valid: false, error: "Runden-Objekt fehlt erforderliches Feld: " + required[i] + "." };
+          return { valid: false, error: "Round object is missing a required field: " + required[i] + "." };
         }
       }
       if (typeof round.differential !== "number" || isNaN(round.differential)) {
-        return { valid: false, error: "Ungültiger Differential-Wert." };
+        return { valid: false, error: "Invalid differential value." };
       }
       return { valid: true, error: null };
     }
@@ -179,7 +179,7 @@
      */
     saveRounds: function (rounds) {
       if (!Array.isArray(rounds)) {
-        return { success: false, error: "Runden müssen ein Array sein." };
+        return { success: false, error: "Rounds must be an array." };
       }
       try {
         var json = JSON.stringify(rounds);
@@ -187,10 +187,10 @@
         return { success: true, error: null };
       } catch (e) {
         if (e.name === "QuotaExceededError") {
-          return { success: false, error: "Speicherplatz voll. Bitte alte Runden löschen." };
+          return { success: false, error: "Storage space full. Please delete old rounds." };
         }
         console.error("Error saving to LocalStorage:", e);
-        return { success: false, error: "Fehler beim Speichern: " + e.message };
+        return { success: false, error: "Error saving: " + e.message };
       }
     },
 
@@ -204,7 +204,7 @@
         return { success: true, error: null };
       } catch (e) {
         console.error("Error deleting from LocalStorage:", e);
-        return { success: false, error: "Fehler beim Löschen: " + e.message };
+        return { success: false, error: "Error deleting: " + e.message };
       }
     }
   };
@@ -334,14 +334,14 @@
 
   var UIService = {
     /**
-     * Format date from YYYY-MM-DD to DD.MM.YYYY.
+     * Format date from YYYY-MM-DD to DD/MM/YYYY.
      * @param {string} isoDate - ISO date string
      * @returns {string} Formatted date string
      */
     formatDate: function (isoDate) {
       var parts = isoDate.split("-");
       if (parts.length !== 3) return isoDate;
-      return parts[2] + "." + parts[1] + "." + parts[0];
+      return parts[2] + "/" + parts[1] + "/" + parts[0];
     },
 
     /**
@@ -367,7 +367,7 @@
       container.textContent = "";
       container.classList.remove("visible");
       requestAnimationFrame(function () {
-        container.textContent = message || "Ein Fehler ist aufgetreten.";
+        container.textContent = message || "An error occurred.";
         container.classList.add("visible");
         container.setAttribute("role", "alert");
         container.setAttribute("aria-live", "assertive");
@@ -543,10 +543,10 @@
     handleDeleteAll: function () {
       var rounds = StorageService.loadRounds();
       if (rounds.length === 0) return;
-      if (!confirm("Wirklich alle gespeicherten Runden löschen?")) return;
+      if (!confirm("Are you sure you want to delete all saved rounds?")) return;
       var deleteResult = StorageService.deleteAll();
       if (!deleteResult.success) {
-        alert("Fehler beim Löschen: " + deleteResult.error);
+        alert("Error deleting: " + deleteResult.error);
         return;
       }
       UIService.clearResult(this.elements.resultContainer);
@@ -563,7 +563,7 @@
       });
       var saveResult = StorageService.saveRounds(rounds);
       if (!saveResult.success) {
-        alert("Fehler beim Löschen: " + saveResult.error);
+        alert("Error deleting: " + saveResult.error);
         return;
       }
       this.updateUI();
@@ -618,8 +618,8 @@
         var deleteButton = document.createElement("button");
         deleteButton.type = "button";
         deleteButton.className = "btn-round-delete";
-        deleteButton.title = "Runde löschen";
-        deleteButton.setAttribute("aria-label", "Runde vom " + UIService.formatDate(round.date) + " löschen");
+        deleteButton.title = "Delete round";
+        deleteButton.setAttribute("aria-label", "Delete round from " + UIService.formatDate(round.date));
         deleteButton.textContent = "×";
         deleteButton.addEventListener("click", function () {
           app.deleteRound(round.id);

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,39 +12,39 @@
 <body>
   <main class="container">
     <h1>Score Differential</h1>
-    <p class="subtitle">Golf-Handicap berechnen</p>
+    <p class="subtitle">Calculate Golf Handicap</p>
 
     <form id="handicap-form" class="form" novalidate>
-      <label for="round-date">Datum</label>
+      <label for="round-date">Date</label>
       <input type="date" id="round-date" name="round-date" required aria-describedby="result">
 
-      <label for="gross-score">Brutto-Score</label>
-      <input type="number" id="gross-score" name="gross-score" min="1" max="200" placeholder="z.B. 85" required aria-describedby="result">
+      <label for="gross-score">Gross Score</label>
+      <input type="number" id="gross-score" name="gross-score" min="1" max="200" placeholder="e.g. 85" required aria-describedby="result">
 
       <label for="course-rating">Course Rating</label>
-      <input type="number" id="course-rating" name="course-rating" step="0.1" min="50" max="80" placeholder="z.B. 72.5" required aria-describedby="result">
+      <input type="number" id="course-rating" name="course-rating" step="0.1" min="50" max="80" placeholder="e.g. 72.5" required aria-describedby="result">
 
       <label for="slope-rating">Slope Rating</label>
-      <input type="number" id="slope-rating" name="slope-rating" min="55" max="155" placeholder="z.B. 128" required aria-describedby="result">
+      <input type="number" id="slope-rating" name="slope-rating" min="55" max="155" placeholder="e.g. 128" required aria-describedby="result">
 
-      <button type="submit" id="calculate-btn">Berechnen &amp; Speichern</button>
+      <button type="submit" id="calculate-btn">Calculate &amp; Save</button>
     </form>
 
     <div id="result" class="result" role="status" aria-live="polite" aria-atomic="true"></div>
 
     <section class="handicap-section" id="handicap-section" aria-live="polite" aria-atomic="true">
-      <h2 class="handicap-title">Aktuelles Handicap</h2>
+      <h2 class="handicap-title">Current Handicap</h2>
       <div class="handicap-value" id="handicap-value" aria-label="Handicap Index">—</div>
-      <p class="handicap-hint" id="handicap-hint">Beste 8 aus den letzten 20 Runden</p>
+      <p class="handicap-hint" id="handicap-hint">Best 8 out of the last 20 rounds</p>
     </section>
 
     <section class="rounds-section" aria-labelledby="rounds-title-heading">
       <div class="rounds-header">
-        <h2 class="rounds-title" id="rounds-title-heading">Meine letzten Runden</h2>
-        <button type="button" class="btn-text btn-delete-all" id="delete-all" title="Alle Runden löschen" aria-label="Alle gespeicherten Runden löschen">Alle löschen</button>
+        <h2 class="rounds-title" id="rounds-title-heading">My Recent Rounds</h2>
+        <button type="button" class="btn-text btn-delete-all" id="delete-all" title="Delete all rounds" aria-label="Delete all saved rounds">Delete All</button>
       </div>
-      <div id="rounds-list" class="rounds-list" role="list" aria-label="Liste der gespeicherten Golfrunden"></div>
-      <p id="rounds-empty" class="rounds-empty" role="status" aria-live="polite">Noch keine Runden gespeichert.</p>
+      <div id="rounds-list" class="rounds-list" role="list" aria-label="List of saved golf rounds"></div>
+      <p id="rounds-empty" class="rounds-empty" role="status" aria-live="polite">No rounds saved yet.</p>
     </section>
   </main>
 
