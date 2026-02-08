@@ -100,6 +100,16 @@ h1 {
   box-shadow: 0 0 0 2px rgba(10, 31, 22, 0.08);
 }
 
+.form input[aria-invalid="true"] {
+  border-color: #b91c1c;
+  background: rgba(185, 28, 28, 0.04);
+}
+
+.form input[aria-invalid="true"]:focus {
+  border-color: #b91c1c;
+  box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.12);
+}
+
 .form input[type="number"] {
   -moz-appearance: textfield;
 }
