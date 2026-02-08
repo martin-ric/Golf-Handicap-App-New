@@ -246,7 +246,10 @@ if ('serviceWorker' in navigator) {
       if (roundCount >= 1 && roundCount <= 3) {
         return { countToUse: 1, adjustment: -2.0 };
       }
-      if (roundCount >= 4 && roundCount <= 5) {
+      if (roundCount === 4) {
+        return { countToUse: 1, adjustment: -1.0 };
+      }
+      if (roundCount === 5) {
         return { countToUse: 1, adjustment: 0 };
       }
       if (roundCount === 6) {
